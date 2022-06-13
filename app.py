@@ -1,5 +1,3 @@
-import streamlit as st
-import datetime
 from transformers import pipeline
 import gradio as gr
 
