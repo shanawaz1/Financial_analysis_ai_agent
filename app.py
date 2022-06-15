@@ -30,9 +30,9 @@ with demo:
     text = gr.Textbox()
     b1.click(speech_to_text, inputs=audio_file, outputs=text)
     
-    stext = gr.Textbox()
     b2 = gr.Button("Summarize Text")
-    b3.click(summarize_text, inputs=text, outputs=stext)
+    stext = gr.Textbox()
+    b2.click(summarize_text, inputs=text, outputs=stext)
     
     b3 = gr.Button("Classify Sentiment")
     label = gr.Label()
