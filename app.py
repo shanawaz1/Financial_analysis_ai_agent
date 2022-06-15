@@ -28,7 +28,9 @@ def text_to_sentiment(text):
     
 def ner(text):
     api = gr.Interface.load("dslim/bert-base-NER", src='models')
+    print (API)
     spans = api(text)
+    print (spans)
     replaced_spans = [(key, None) if value=='No Disease' else (key, value) for (key, value) in spans]
     return replaced_spans    
     
