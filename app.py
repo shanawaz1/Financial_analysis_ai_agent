@@ -50,7 +50,7 @@ with demo:
     b3.click(text_to_sentiment, inputs=stext, outputs=label)
     
     b4 = gr.Button("Extract Companies & Segments")
-    label = gr.Label()
+    replaced_spans = gr. HighlightedText()
     b4.click(ner, inputs=text, outputs=replaced_spans)
     
 demo.launch(share=True)
