@@ -1,11 +1,10 @@
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 import gradio as gr
 import os
+auth_token = os.environ.get("HF_Token")
 
 asr = pipeline("automatic-speech-recognition", "facebook/wav2vec2-base-960h")
 summarizer = pipeline("summarization", model="knkarthick/MEETING_SUMMARY")
-
-auth_token = os.environ.get("HF_Token")
 tokenizer = AutoTokenizer.from_pretrained("demo-org/auditor_review_model",use_auth_token=auth_token)
 audit_model = AutoModelForSequenceClassification.from_pretrained("demo-org/auditor_review_model",use_auth_token=auth_token)
 nlp = pipeline("text-classification", model=audit_model, tokenizer=tokenizer)
@@ -28,11 +27,9 @@ def text_to_sentiment(text):
     
 def ner(text):
     api = gr.Interface.load("dslim/bert-base-NER", src='models')
-    print (api)
     spans = api(text)
-    print (spans)
-    replaced_spans = [(key, None) if value=='No Disease' else (key, value) for (key, value) in spans]
-    return replaced_spans    
+    #replaced_spans = [(key, None) if value=='No Disease' else (key, value) for (key, value) in spans]
+    return spans    
     
 demo = gr.Blocks()
 
