@@ -26,6 +26,12 @@ def text_to_sentiment(text):
     sentiment = nlp(text)[0]["label"]
     return sentiment 
     
+def ner(text):
+    api = gr.Interface.load("wolfrage89/company_segment_ner", src='models')
+    spans = api(text)
+    replaced_spans = [(key, None) if value=='No Disease' else (key, value) for (key, value) in spans]
+    return replaced_spans    
+    
 demo = gr.Blocks()
 
 with demo:
@@ -42,5 +48,9 @@ with demo:
     b3 = gr.Button("Classify Sentiment")
     label = gr.Label()
     b3.click(text_to_sentiment, inputs=stext, outputs=label)
+    
+    b4 = gr.Button("Extract Companies & Segments")
+    label = gr.Label()
+    b4.click(text_to_sentiment, inputs=stext, outputs=label)
     
 demo.launch(share=True)
