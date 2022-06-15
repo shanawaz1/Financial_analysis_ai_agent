@@ -1,5 +1,6 @@
 from transformers import pipeline
 import gradio as gr
+import os
 
 asr = pipeline("automatic-speech-recognition", "facebook/wav2vec2-base-960h")
 summarizer = pipeline("summarization", model="knkarthick/MEETING_SUMMARY")
