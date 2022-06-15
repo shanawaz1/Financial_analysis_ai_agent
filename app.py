@@ -27,7 +27,7 @@ def text_to_sentiment(text):
     return sentiment 
     
 def ner(text):
-    api = gr.Interface.load("wolfrage89/company_segment_ner", src='models')
+    api = gr.Interface.load("dslim/bert-base-NER", src='models')
     spans = api(text)
     replaced_spans = [(key, None) if value=='No Disease' else (key, value) for (key, value) in spans]
     return replaced_spans    
@@ -51,6 +51,6 @@ with demo:
     
     b4 = gr.Button("Extract Companies & Segments")
     label = gr.Label()
-    b4.click(ner, inputs=text, outputs="highlightedtext")
+    b4.click(ner, inputs=text, outputs=replaced_spans)
     
 demo.launch(share=True)
