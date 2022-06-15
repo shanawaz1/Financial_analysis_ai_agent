@@ -51,6 +51,6 @@ with demo:
     
     b4 = gr.Button("Extract Companies & Segments")
     label = gr.Label()
-    b4.click(text_to_sentiment, inputs=stext, outputs=label)
+    b4.click(ner, inputs=text, outputs="highlightedtext")
     
 demo.launch(share=True)
