@@ -3,7 +3,11 @@ import gradio as gr
 
 asr = pipeline("automatic-speech-recognition", "facebook/wav2vec2-base-960h")
 summarizer = pipeline("summarization", model="knkarthick/MEETING_SUMMARY")
-classifier = pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion")
+
+auth_token = os.environ.get("HF_Token")
+tokenizer = AutoTokenizer.from_pretrained("demo-org/auditor_review_model",use_auth_token=auth_token)
+audit_model = AutoModelForSequenceClassification.from_pretrained("demo-org/auditor_review_model",use_auth_token=auth_token)
+nlp = pipeline("text-classification", model=audit_model, tokenizer=tokenizer)
 
 def transcribe(audio):
     text = asr(audio)["text"]
@@ -18,7 +22,7 @@ def summarize_text(text):
     return stext
 
 def text_to_sentiment(text):
-    sentiment = classifier(text)[0]["label"]
+    sentiment = nlp(text)[0]["label"]
     return sentiment 
     
 demo = gr.Blocks()
