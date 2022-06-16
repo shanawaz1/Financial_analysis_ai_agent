@@ -61,7 +61,7 @@ def fin_ext(text):
 
 ##Forward Looking Statement
 def fls(text):
-    print ("sent")
+    print ("fls")
     doc = nlp(text)
     doc_sents = [sent for sent in doc.sents]
     sents_list = []
@@ -77,9 +77,6 @@ def fls(text):
     fls_spans = list(zip(sents_list,results_list))
     print (fls_spans)
     return fls_spans  
-
-
-demo = gr.Blocks()
 
 demo = gr.Blocks()
 
