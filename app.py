@@ -107,8 +107,8 @@ with demo:
                 fin_spans = gr.HighlightedText()
                 b5.click(fin_ext, inputs=text, outputs=fin_spans)
             with gr.Row():
-                b6 = gr.Button("Extract Forward Looking Statements")
+                #b6 = gr.Button("Extract Forward Looking Statements")
                 fls_spans = gr.HighlightedText()
-                b6.click(fls, inputs=text, outputs=fls_spans)
+                b5.click(fls, inputs=text, outputs=fls_spans)
     
 demo.launch()
