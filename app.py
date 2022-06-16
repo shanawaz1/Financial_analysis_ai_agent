@@ -31,11 +31,13 @@ def text_to_sentiment(text):
 
 ##Company Extraction    
 def fin_ner(text):
+    print ("ner")
     tokenizer = AutoTokenizer.from_pretrained("dslim/bert-base-NER")
     model = AutoModelForTokenClassification.from_pretrained("dslim/bert-base-NER")
-    ner = pipeline("ner", model=model, tokenizer=tokenizer)
+    ner_pipeline = pipeline("ner", model=model, tokenizer=tokenizer)
     #api = gr.Interface.load("dslim/bert-base-NER", src='models')
-    spans = ner(text)
+    spans = ner_pipeline(text)
+    print ("spans")
     #replaced_spans = [(key, None) if value=='No Disease' else (key, value) for (key, value) in spans]
     return spans    
 
