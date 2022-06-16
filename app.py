@@ -60,27 +60,33 @@ def fin_ext(text):
 
 demo = gr.Blocks()
 
-with demo:
+demo = gr.Blocks()
 
-    audio_file = gr.inputs.Audio(source="microphone", type="filepath")
-    b1 = gr.Button("Recognize Speech") 
-    text = gr.Textbox(value="US retail sales fell in May for the first time in five months, restrained by a plunge in auto purchases and other big-ticket items, suggesting moderating demand for goods amid decades-high inflation. The value of overall retail purchases decreased 0.3%, after a downwardly revised 0.7% gain in April, Commerce Department figures showed Wednesday. Excluding vehicles, sales rose 0.5% last month. The figures aren’t adjusted for inflation.")
-    b1.click(speech_to_text, inputs=audio_file, outputs=text)
-    
-    b2 = gr.Button("Summarize Text")
-    stext = gr.Textbox()
-    b2.click(summarize_text, inputs=text, outputs=stext)
-    
-    b3 = gr.Button("Classify Overall Financial Sentiment")
-    label = gr.Label()
-    b3.click(text_to_sentiment, inputs=stext, outputs=label)
-    
-    b4 = gr.Button("Extract Companies & Segments")
-    replaced_spans = gr.HighlightedText()
-    b4.click(fin_ner, inputs=text, outputs=replaced_spans)
-    
-    b5 = gr.Button("Extract Financial Sentiment")
-    fin_spans = gr.HighlightedText()
-    b5.click(fin_ext, inputs=text, outputs=fin_spans)
+with demo:
+    with gr.Row():
+        with gr.Column():
+            audio_file = gr.inputs.Audio(source="microphone", type="filepath")
+            with gr.Row():
+                b1 = gr.Button("Recognize Speech") 
+            with gr.Row():
+                text = gr.Textbox(value="US retail sales fell in May for the first time in five months, restrained by a plunge in auto purchases and other big-ticket items, suggesting moderating demand for goods amid decades-high inflation. The value of overall retail purchases decreased 0.3%, after a downwardly revised 0.7% gain in April, Commerce Department figures showed Wednesday. Excluding vehicles, sales rose 0.5% last month. The figures aren’t adjusted for inflation.")
+                b1.click(speech_to_text, inputs=audio_file, outputs=text)
+            with gr.Row():
+                b2 = gr.Button("Summarize Text")
+                stext = gr.Textbox()
+                b2.click(summarize_text, inputs=text, outputs=stext)       
+        with gr.Column():
+            with gr.Row():
+                b3 = gr.Button("Classify Overall Financial Sentiment")
+                label = gr.Label()
+                b3.click(text_to_sentiment, inputs=stext, outputs=label)
+            with gr.Row():
+                b4 = gr.Button("Extract Companies & Segments")
+                replaced_spans = gr.HighlightedText()
+                b4.click(fin_ner, inputs=text, outputs=replaced_spans)
+            with gr.Row():
+                b5 = gr.Button("Extract Financial Sentiment")
+                fin_spans = gr.HighlightedText()
+                b5.click(fin_ext, inputs=text, outputs=fin_spans)
     
 demo.launch()
