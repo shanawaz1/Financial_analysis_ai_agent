@@ -30,7 +30,7 @@ def text_to_sentiment(text):
     return sentiment 
 
 ##Company Extraction    
-def ner(text):
+def fin_ner(text):
     tokenizer = AutoTokenizer.from_pretrained("dslim/bert-base-NER")
     model = AutoModelForTokenClassification.from_pretrained("dslim/bert-base-NER")
     ner = pipeline("ner", model=model, tokenizer=tokenizer)
@@ -73,7 +73,7 @@ with demo:
     
     b4 = gr.Button("Extract Companies & Segments")
     replaced_spans = gr.HighlightedText()
-    b4.click(ner, inputs=text, outputs=replaced_spans)
+    b4.click(fin_ner, inputs=text, outputs=replaced_spans)
     
     b5 = gr.Button("Extract Financial Sentiment")
     fin_spans = gr.HighlightedText()
