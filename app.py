@@ -31,9 +31,9 @@ def text_to_sentiment(text):
 ##Company Extraction    
 def fin_ner(text):
     print ("ner")
-    ner_pipeline = pipeline("ner", model="dslim/bert-base-NER", tokenizer="dslim/bert-base-NER")
-    #api = gr.Interface.load("dslim/bert-base-NER", src='models')
-    replaced_spans = ner_pipeline(text)
+    #ner_pipeline = pipeline("ner", model="dslim/bert-base-NER", tokenizer="dslim/bert-base-NER")
+    api = gr.Interface.load("dslim/bert-base-NER", src='models')
+    replaced_spans = api(text)
     print (replaced_spans)
     print ("spans2")
     #replaced_spans = [(key, None) if value=='No Disease' else (key, value) for (key, value) in spans]
