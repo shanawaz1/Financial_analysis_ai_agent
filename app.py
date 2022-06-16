@@ -1,4 +1,4 @@
-from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
+from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification, AutoModelForTokenClassification
 import gradio as gr
 import os
 import spacy
@@ -31,8 +31,11 @@ def text_to_sentiment(text):
 
 ##Company Extraction    
 def ner(text):
-    api = gr.Interface.load("dslim/bert-base-NER", src='models')
-    spans = api(text)
+    tokenizer = AutoTokenizer.from_pretrained("dslim/bert-base-NER")
+    model = AutoModelForTokenClassification.from_pretrained("dslim/bert-base-NER")
+    ner = pipeline("ner", model=model, tokenizer=tokenizer)
+    #api = gr.Interface.load("dslim/bert-base-NER", src='models')
+    spans = ner(text)
     #replaced_spans = [(key, None) if value=='No Disease' else (key, value) for (key, value) in spans]
     return spans    
 
