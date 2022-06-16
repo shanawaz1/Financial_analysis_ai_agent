@@ -75,5 +75,4 @@ with demo:
     replaced_spans = gr.HighlightedText()
     b5.click(fin_ext, inputs=text, outputs=fin_spans)
     
-    
 demo.launch(share=True)
