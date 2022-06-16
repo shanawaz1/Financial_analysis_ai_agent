@@ -37,7 +37,7 @@ def fin_ner(text):
     ner_pipeline = pipeline("ner", model=model, tokenizer=tokenizer)
     #api = gr.Interface.load("dslim/bert-base-NER", src='models')
     spans = ner_pipeline(text)
-    print ("spans")
+    print (spans)
     #replaced_spans = [(key, None) if value=='No Disease' else (key, value) for (key, value) in spans]
     return spans    
 
@@ -75,7 +75,7 @@ with demo:
     
     b4 = gr.Button("Extract Companies & Segments")
     replaced_spans = gr.HighlightedText()
-    b4.click(fin_ner, inputs=text, outputs=replaced_spans)
+    b4.click(fin_ner, inputs=text, outputs=spans)
     
     b5 = gr.Button("Extract Financial Sentiment")
     fin_spans = gr.HighlightedText()
