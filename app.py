@@ -38,14 +38,16 @@ def ner(text):
 
 ##Fiscal Sentiment by Sentence
 def fin_ext(text):
+
     doc = nlp(text)
     doc_sents = [sent for sent in doc.sents]
     sents_list = []
     for sent in doc.sents:
         sents_list.append(sent.text)
-    results_list=[]
+    results_list = []
     for i in range(len(results)):
         results_list.append(results[i]['label'])
+    fin_spans = []
     fin_spans = list(zip(sents_list,results_list))
     return fin_spans    
 
