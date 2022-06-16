@@ -72,7 +72,7 @@ with demo:
     b4.click(ner, inputs=text, outputs=replaced_spans)
     
     b5 = gr.Button("Extract Financial Sentiment")
-    replaced_spans = gr.HighlightedText()
+    fin_spans = gr.HighlightedText()
     b5.click(fin_ext, inputs=text, outputs=fin_spans)
     
 demo.launch(share=True)
