@@ -22,8 +22,9 @@ def summarize_text(text):
     return stext
 
 ##Fiscal Sentiment
-fin_model = pipeline("text-classification", model="demo-org/auditor_review_model", \
-    tokenizer="demo-org/auditor_review_model",use_auth_token=auth_token)
+#fin_model = pipeline("text-classification", model="demo-org/auditor_review_model", \
+#    tokenizer="demo-org/auditor_review_model",use_auth_token=auth_token)
+fin_model = pipeline("text-classification")
 def text_to_sentiment(text):
     sentiment = fin_model(text)[0]["label"]
     return sentiment 
@@ -63,7 +64,7 @@ with demo:
 
     audio_file = gr.inputs.Audio(source="microphone", type="filepath")
     b1 = gr.Button("Recognize Speech") 
-    text = gr.Textbox()
+    text = gr.Textbox(value="US retail sales fell in May for the first time in five months, restrained by a plunge in auto purchases and other big-ticket items, suggesting moderating demand for goods amid decades-high inflation. The value of overall retail purchases decreased 0.3%, after a downwardly revised 0.7% gain in April, Commerce Department figures showed Wednesday. Excluding vehicles, sales rose 0.5% last month. The figures aren’t adjusted for inflation.")
     b1.click(speech_to_text, inputs=audio_file, outputs=text)
     
     b2 = gr.Button("Summarize Text")
