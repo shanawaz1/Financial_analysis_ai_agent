@@ -22,9 +22,8 @@ def summarize_text(text):
     return stext
 
 ##Fiscal Sentiment
-tokenizer = AutoTokenizer.from_pretrained("demo-org/auditor_review_model",use_auth_token=auth_token)
-audit_model = AutoModelForSequenceClassification.from_pretrained("demo-org/auditor_review_model",use_auth_token=auth_token)
-fin_model = pipeline("text-classification", model=audit_model, tokenizer=tokenizer)
+fin_model = pipeline("text-classification", model="demo-org/auditor_review_model", \
+    tokenizer="demo-org/auditor_review_model",use_auth_token=auth_token)
 def text_to_sentiment(text):
     sentiment = fin_model(text)[0]["label"]
     return sentiment 
@@ -32,15 +31,13 @@ def text_to_sentiment(text):
 ##Company Extraction    
 def fin_ner(text):
     print ("ner")
-    tokenizer = AutoTokenizer.from_pretrained("dslim/bert-base-NER")
-    model = AutoModelForTokenClassification.from_pretrained("dslim/bert-base-NER")
-    ner_pipeline = pipeline("ner", model=model, tokenizer=tokenizer)
+    ner_pipeline = pipeline("ner", model="dslim/bert-base-NER", tokenizer="dslim/bert-base-NER")
     #api = gr.Interface.load("dslim/bert-base-NER", src='models')
-    spans = ner_pipeline(text)
-    print (spans)
+    replaced_spans = ner_pipeline(text)
+    print (replaced_spans)
     print ("spans2")
     #replaced_spans = [(key, None) if value=='No Disease' else (key, value) for (key, value) in spans]
-    return spans    
+    return replaced_spans    
 
 ##Fiscal Sentiment by Sentence
 def fin_ext(text):
@@ -76,7 +73,7 @@ with demo:
     
     b4 = gr.Button("Extract Companies & Segments")
     replaced_spans = gr.HighlightedText()
-    b4.click(fin_ner, inputs=text, outputs=spans)
+    b4.click(fin_ner, inputs=text, outputs=replaced_spans)
     
     b5 = gr.Button("Extract Financial Sentiment")
     fin_spans = gr.HighlightedText()
