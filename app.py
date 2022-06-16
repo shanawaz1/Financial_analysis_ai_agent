@@ -41,17 +41,20 @@ def fin_ner(text):
 
 ##Fiscal Sentiment by Sentence
 def fin_ext(text):
+    print ("sent")
     doc = nlp(text)
     doc_sents = [sent for sent in doc.sents]
     sents_list = []
     for sent in doc.sents:
         sents_list.append(sent.text)
     results = fin_model(sents_list)
+    print (results)
     results_list = []
     for i in range(len(results)):
         results_list.append(results[i]['label'])
     fin_spans = []
     fin_spans = list(zip(sents_list,results_list))
+    print (fin_spans)
     return fin_spans    
 
 demo = gr.Blocks()
