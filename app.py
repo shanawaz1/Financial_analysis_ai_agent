@@ -59,6 +59,26 @@ def fin_ext(text):
     print (fin_spans)
     return fin_spans    
 
+##Forward Looking Statement
+def fls(text):
+    print ("sent")
+    doc = nlp(text)
+    doc_sents = [sent for sent in doc.sents]
+    sents_list = []
+    for sent in doc.sents:
+        sents_list.append(sent.text)
+    fin_model = pipeline("text-classification", model="yiyanghkust/finbert-fls", tokenizer="yiyanghkust/finbert-fls")
+    results = fin_model(sents_list)
+    print (results)
+    results_list = []
+    for i in range(len(results)):
+        results_list.append(results[i]['label'])
+    fls_spans = []
+    fls_spans = list(zip(sents_list,results_list))
+    print (fls_spans)
+    return fls_spans  
+
+
 demo = gr.Blocks()
 
 demo = gr.Blocks()
@@ -89,5 +109,9 @@ with demo:
                 b5 = gr.Button("Extract Financial Sentiment")
                 fin_spans = gr.HighlightedText()
                 b5.click(fin_ext, inputs=text, outputs=fin_spans)
+            with gr.Row():
+                b6 = gr.Button("Extract Forward Looking Statements")
+                fin_spans = gr.HighlightedText()
+                b6.click(fls, inputs=text, outputs=fls_spans)
     
 demo.launch()
