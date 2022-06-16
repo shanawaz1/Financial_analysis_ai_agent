@@ -43,6 +43,7 @@ def fin_ext(text):
     sents_list = []
     for sent in doc.sents:
         sents_list.append(sent.text)
+    results = fin_model(sents_list)
     results_list = []
     for i in range(len(results)):
         results_list.append(results[i]['label'])
