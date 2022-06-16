@@ -24,9 +24,9 @@ def summarize_text(text):
 ##Fiscal Sentiment
 tokenizer = AutoTokenizer.from_pretrained("demo-org/auditor_review_model",use_auth_token=auth_token)
 audit_model = AutoModelForSequenceClassification.from_pretrained("demo-org/auditor_review_model",use_auth_token=auth_token)
-nlp = pipeline("text-classification", model=audit_model, tokenizer=tokenizer)
+fin_model = pipeline("text-classification", model=audit_model, tokenizer=tokenizer)
 def text_to_sentiment(text):
-    sentiment = nlp(text)[0]["label"]
+    sentiment = fin_model(text)[0]["label"]
     return sentiment 
 
 ##Company Extraction    
