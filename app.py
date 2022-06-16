@@ -18,7 +18,8 @@ def speech_to_text(speech):
 ##Summarization 
 summarizer = pipeline("summarization", model="knkarthick/MEETING_SUMMARY")
 def summarize_text(text):
-    stext = summarizer(text)
+    resp = summarizer(text)
+    stext = resp[0]['summary_text']
     return stext
 
 ##Fiscal Sentiment
