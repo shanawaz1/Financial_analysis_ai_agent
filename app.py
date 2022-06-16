@@ -38,6 +38,7 @@ def fin_ner(text):
     #api = gr.Interface.load("dslim/bert-base-NER", src='models')
     spans = ner_pipeline(text)
     print (spans)
+    print ("spans2)
     #replaced_spans = [(key, None) if value=='No Disease' else (key, value) for (key, value) in spans]
     return spans    
 
