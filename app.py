@@ -67,8 +67,8 @@ def fls(text):
     sents_list = []
     for sent in doc.sents:
         sents_list.append(sent.text)
-    fin_model = pipeline("text-classification", model="yiyanghkust/finbert-fls", tokenizer="yiyanghkust/finbert-fls")
-    results = fin_model(sents_list)
+    fls_model = pipeline("text-classification", model="yiyanghkust/finbert-fls", tokenizer="yiyanghkust/finbert-fls")
+    results = fls_model(sents_list)
     print (results)
     results_list = []
     for i in range(len(results)):
