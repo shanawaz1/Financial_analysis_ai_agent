@@ -101,7 +101,7 @@ with demo:
                 label = gr.Label()
                 b3.click(text_to_sentiment, inputs=stext, outputs=label)  
         with gr.Column():
-                b5 = gr.Button("Extract Financial Sentiment")
+            b5 = gr.Button("Extract Financial Sentiment")
             with gr.Row():
                 fin_spans = gr.HighlightedText()
                 b5.click(fin_ext, inputs=text, outputs=fin_spans)
