@@ -1,7 +1,8 @@
+import os
 os.system("pip install gradio==3.0.18")
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification, AutoModelForTokenClassification
 import gradio as gr
-import os
+
 import spacy
 nlp = spacy.load('en_core_web_sm')
 
@@ -24,7 +25,8 @@ def summarize_text(text):
     return stext
 
 ##Fiscal Sentiment
-#fin_model = pipeline("text-classification", model="demo-org/auditor_review_model", \n#    tokenizer="demo-org/auditor_review_model",use_auth_token=auth_token)
+#fin_model = pipeline("text-classification", model="demo-org/auditor_review_model", 
+#    tokenizer="demo-org/auditor_review_model",use_auth_token=auth_token)
 fin_model = pipeline("text-classification")
 def text_to_sentiment(text):
     sentiment = fin_model(text)[0]["label"]
