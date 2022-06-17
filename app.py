@@ -27,7 +27,8 @@ def summarize_text(text):
 ##Fiscal Sentiment
 #fin_model = pipeline("text-classification", model="demo-org/auditor_review_model", 
 #    tokenizer="demo-org/auditor_review_model",use_auth_token=auth_token)
-fin_model = pipeline("text-classification")
+#fin_model = pipeline("text-classification")
+fin_model= pipeline("sentiment-analysis", model='yiyanghkust/finbert-tone', tokenizer='yiyanghkust/finbert-tone')
 def text_to_sentiment(text):
     sentiment = fin_model(text)[0]["label"]
     return sentiment 
