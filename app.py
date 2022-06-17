@@ -69,7 +69,7 @@ def fls(text):
 demo = gr.Blocks()
 
 with demo:
-    gr.Markdown("## Analyst AI")
+    gr.Markdown("## Financial Analyst AI")
     gr.Markdown("This project applies AI trained by our financial analysts to analyze earning calls and other financial documents.")
     with gr.Row():
         with gr.Column():
