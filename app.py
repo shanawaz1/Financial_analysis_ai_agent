@@ -95,23 +95,22 @@ with demo:
             with gr.Row():
                 b2 = gr.Button("Summarize Text")
                 stext = gr.Textbox()
-                b2.click(summarize_text, inputs=text, outputs=stext)       
-        with gr.Column():
+                b2.click(summarize_text, inputs=text, outputs=stext)     
             with gr.Row():
                 b3 = gr.Button("Classify Overall Financial Sentiment")
                 label = gr.Label()
-                b3.click(text_to_sentiment, inputs=stext, outputs=label)
+                b3.click(text_to_sentiment, inputs=stext, outputs=label)  
+        with gr.Column():
+                b5 = gr.Button("Extract Financial Sentiment")
+            with gr.Row():
+                fin_spans = gr.HighlightedText()
+                b5.click(fin_ext, inputs=text, outputs=fin_spans)
+            with gr.Row():
+                fls_spans = gr.HighlightedText()
+                b5.click(fls, inputs=text, outputs=fls_spans)
             with gr.Row():
                 b4 = gr.Button("Extract Companies & Segments")
                 replaced_spans = gr.HighlightedText()
                 b4.click(fin_ner, inputs=text, outputs=replaced_spans)
-            with gr.Row():
-                b5 = gr.Button("Extract Financial Sentiment")
-                fin_spans = gr.HighlightedText()
-                b5.click(fin_ext, inputs=text, outputs=fin_spans)
-            with gr.Row():
-                #b6 = gr.Button("Extract Forward Looking Statements")
-                fls_spans = gr.HighlightedText()
-                b5.click(fls, inputs=text, outputs=fls_spans)
     
 demo.launch()
