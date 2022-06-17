@@ -6,8 +6,6 @@ import gradio as gr
 import spacy
 nlp = spacy.load('en_core_web_sm')
 
-auth_token = os.environ.get("HF_Token")
-
 ##Speech Recognition
 asr = pipeline("automatic-speech-recognition", "facebook/wav2vec2-base-960h")
 def transcribe(audio):
@@ -24,10 +22,9 @@ def summarize_text(text):
     stext = resp[0]['summary_text']
     return stext
 
-##Fiscal Sentiment
+##Fiscal Tone Analysis
 #fin_model = pipeline("text-classification", model="demo-org/auditor_review_model", 
 #    tokenizer="demo-org/auditor_review_model",use_auth_token=auth_token)
-#fin_model = pipeline("text-classification")
 fin_model= pipeline("sentiment-analysis", model='yiyanghkust/finbert-tone', tokenizer='yiyanghkust/finbert-tone')
 def text_to_sentiment(text):
     sentiment = fin_model(text)[0]["label"]
@@ -35,36 +32,27 @@ def text_to_sentiment(text):
 
 ##Company Extraction    
 def fin_ner(text):
-    print ("ner")
-    #ner_pipeline = pipeline("ner", model="dslim/bert-base-NER", tokenizer="dslim/bert-base-NER")
     api = gr.Interface.load("dslim/bert-base-NER", src='models')
     replaced_spans = api(text)
-    print (replaced_spans)
-    print ("spans2")
-    #replaced_spans = [(key, None) if value=='No Disease' else (key, value) for (key, value) in spans]
     return replaced_spans    
 
 ##Fiscal Sentiment by Sentence
 def fin_ext(text):
-    print ("sent")
     doc = nlp(text)
     doc_sents = [sent for sent in doc.sents]
     sents_list = []
     for sent in doc.sents:
         sents_list.append(sent.text)
     results = fin_model(sents_list)
-    print (results)
     results_list = []
     for i in range(len(results)):
         results_list.append(results[i]['label'])
     fin_spans = []
     fin_spans = list(zip(sents_list,results_list))
-    print (fin_spans)
     return fin_spans    
 
 ##Forward Looking Statement
 def fls(text):
-    print ("fls")
     doc = nlp(text)
     doc_sents = [sent for sent in doc.sents]
     sents_list = []
@@ -72,13 +60,11 @@ def fls(text):
         sents_list.append(sent.text)
     fls_model = pipeline("text-classification", model="yiyanghkust/finbert-fls", tokenizer="yiyanghkust/finbert-fls")
     results = fls_model(sents_list)
-    print (results)
     results_list = []
     for i in range(len(results)):
         results_list.append(results[i]['label'])
     fls_spans = []
     fls_spans = list(zip(sents_list,results_list))
-    print (fls_spans)
     return fls_spans  
 
 demo = gr.Blocks()
@@ -97,11 +83,11 @@ with demo:
                 stext = gr.Textbox()
                 b2.click(summarize_text, inputs=text, outputs=stext)     
             with gr.Row():
-                b3 = gr.Button("Classify Overall Financial Sentiment")
+                b3 = gr.Button("Classify Financial Tone")
                 label = gr.Label()
                 b3.click(text_to_sentiment, inputs=stext, outputs=label)  
         with gr.Column():
-            b5 = gr.Button("Extract Financial Sentiment")
+            b5 = gr.Button("Financial Tone and Forward Looking Statement Analysis")
             with gr.Row():
                 fin_spans = gr.HighlightedText()
                 b5.click(fin_ext, inputs=text, outputs=fin_spans)
@@ -109,7 +95,7 @@ with demo:
                 fls_spans = gr.HighlightedText()
                 b5.click(fls, inputs=text, outputs=fls_spans)
             with gr.Row():
-                b4 = gr.Button("Extract Companies & Segments")
+                b4 = gr.Button("Identify Companies & Locations")
                 replaced_spans = gr.HighlightedText()
                 b4.click(fin_ner, inputs=text, outputs=replaced_spans)
     
