@@ -5,6 +5,8 @@ import gradio as gr
 import spacy
 nlp = spacy.load('en_core_web_sm')
 
+auth_token = os.environ.get("HF_Token")
+
 ##Speech Recognition
 asr = pipeline("automatic-speech-recognition", "facebook/wav2vec2-base-960h")
 def transcribe(audio):
