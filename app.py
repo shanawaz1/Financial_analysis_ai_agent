@@ -2,7 +2,6 @@ import os
 os.system("pip install gradio==3.0.18")
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification, AutoModelForTokenClassification
 import gradio as gr
-
 import spacy
 nlp = spacy.load('en_core_web_sm')
 
@@ -23,8 +22,6 @@ def summarize_text(text):
     return stext
 
 ##Fiscal Tone Analysis
-#fin_model = pipeline("text-classification", model="demo-org/auditor_review_model", 
-#    tokenizer="demo-org/auditor_review_model",use_auth_token=auth_token)
 fin_model= pipeline("sentiment-analysis", model='yiyanghkust/finbert-tone', tokenizer='yiyanghkust/finbert-tone')
 def text_to_sentiment(text):
     sentiment = fin_model(text)[0]["label"]
@@ -32,7 +29,7 @@ def text_to_sentiment(text):
 
 ##Company Extraction    
 def fin_ner(text):
-    api = gr.Interface.load("dslim/bert-base-NER", src='models')
+    api = gr.Interface.load("dslim/bert-base-NER", src='models',use_auth_token=auth_token)
     replaced_spans = api(text)
     return replaced_spans    
 
@@ -70,6 +67,8 @@ def fls(text):
 demo = gr.Blocks()
 
 with demo:
+    gr.Markdown("## Analyst AI")
+    gr.Markdown("This project applies AI trained by our financial analysts to analyze earning calls and other financial documents.")
     with gr.Row():
         with gr.Column():
             audio_file = gr.inputs.Audio(source="microphone", type="filepath")
