@@ -77,7 +77,7 @@ with demo:
             with gr.Row():
                 b1 = gr.Button("Recognize Speech") 
             with gr.Row():
-                text = gr.Textbox(value="US retail sales fell in May for the first time in five months, restrained by a plunge in auto purchases and other big-ticket items, suggesting moderating demand for goods amid decades-high inflation. The value of overall retail purchases decreased 0.3%, after a downwardly revised 0.7% gain in April, Commerce Department figures showed Wednesday. Excluding vehicles, sales rose 0.5% last month. The figures aren’t adjusted for inflation.")
+                text = gr.Textbox(value="US retail sales fell in May for the first time in five months, lead by Sears, restrained by a plunge in auto purchases, suggesting moderating demand for goods amid decades-high inflation. The value of overall retail purchases decreased 0.3%, after a downwardly revised 0.7% gain in April, Commerce Department figures showed Wednesday. Excluding Tesla vehicles, sales rose 0.5% last month. The department expects inflation to continue to rise.")
                 b1.click(speech_to_text, inputs=audio_file, outputs=text)
             with gr.Row():
                 b2 = gr.Button("Summarize Text")
