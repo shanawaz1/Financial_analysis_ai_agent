@@ -4,7 +4,20 @@ from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassifica
 import gradio as gr
 import spacy
 nlp = spacy.load('en_core_web_sm')
+nlp.add_pipe('sentencizer')
 
+def split_in_sentences(text):
+    doc = nlp(text)
+    return [str(sent).strip() for sent in doc.sents]
+
+def make_spans(text,results):
+    results_list = []
+    for i in range(len(results)):
+        results_list.append(results[i]['label'])
+    facts_spans = []
+    facts_spans = list(zip(split_in_sentences(text),results_list))
+    return facts_spans
+    
 auth_token = os.environ.get("HF_Token")
 
 ##Speech Recognition
@@ -37,19 +50,9 @@ def fin_ner(text):
 
 ##Fiscal Sentiment by Sentence
 def fin_ext(text):
-    doc = nlp(text)
-    doc_sents = [sent for sent in doc.sents]
-    sents_list = []
-    for sent in doc.sents:
-        sents_list.append(sent.text)
-    results = fin_model(sents_list)
-    results_list = []
-    for i in range(len(results)):
-        results_list.append(results[i]['label'])
-    fin_spans = []
-    fin_spans = list(zip(sents_list,results_list))
-    return fin_spans    
-
+    results = fin_model(split_in_sentences(text))
+    return make_spans(text,results)
+    
 ##Forward Looking Statement
 def fls(text):
     doc = nlp(text)
