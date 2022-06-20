@@ -55,19 +55,9 @@ def fin_ext(text):
     
 ##Forward Looking Statement
 def fls(text):
-    doc = nlp(text)
-    doc_sents = [sent for sent in doc.sents]
-    sents_list = []
-    for sent in doc.sents:
-        sents_list.append(sent.text)
     fls_model = pipeline("text-classification", model="yiyanghkust/finbert-fls", tokenizer="yiyanghkust/finbert-fls")
-    results = fls_model(sents_list)
-    results_list = []
-    for i in range(len(results)):
-        results_list.append(results[i]['label'])
-    fls_spans = []
-    fls_spans = list(zip(sents_list,results_list))
-    return fls_spans  
+    results = fls_model(split_in_sentences(text))
+    return make_spans(text,results) 
 
 demo = gr.Blocks()
 
