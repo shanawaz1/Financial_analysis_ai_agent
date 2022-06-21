@@ -1,5 +1,5 @@
 ---
-title: Call Sentiment
+title: Financial Analyst AI
 emoji: 🏢
 colorFrom: blue
 colorTo: indigo
