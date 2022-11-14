@@ -44,7 +44,7 @@ def text_to_sentiment(text):
 
 ##Company Extraction    
 def fin_ner(text):
-    api = gr.Interface.load("dslim/bert-base-NER", src='models', api_key=auth_token)
+    api = gr.Interface.load("dslim/bert-base-NER", src='models', use_auth_token=auth_token)
     replaced_spans = api(text)
     return replaced_spans    
 
