@@ -55,7 +55,8 @@ def fin_ext(text):
     
 ##Forward Looking Statement
 def fls(text):
-    fls_model = pipeline("text-classification", model="yiyanghkust/finbert-fls", tokenizer="yiyanghkust/finbert-fls")
+#    fls_model = pipeline("text-classification", model="yiyanghkust/finbert-fls", tokenizer="yiyanghkust/finbert-fls")
+    fls_model = pipeline("text-classification", model="demo-org/finbert_fls", tokenizer="demo-org/finbert_flsyiyanghkust/finbert-fls", api_key=auth_token)
     results = fls_model(split_in_sentences(text))
     return make_spans(text,results) 
 
