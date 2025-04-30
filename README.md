@@ -1,2 +1,2 @@
 # Financial_analysis_ai_agent
-An AI agent that converts financial audio to text, then uses NLP to extract insights, summarize content, detect tone, identify forward-looking statements, and recognize entities like companies and locations using spaCy and Hugging Face models.
+A voice-powered AI assistant that converts spoken financial commentary into text using speech-to-text processing. Once transcribed, it applies natural language processing (spaCy and Hugging Face models) to extract sentence-level insights, summarize key points, identify tone and forward-looking statements, and recognize companies and locations through named entity recognition (NER). Ideal for real-time analysis of earnings calls, interviews, and financial news.
