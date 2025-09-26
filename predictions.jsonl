@@ -1,0 +1,10 @@
+{"text": "Apple Inc. opened a new office in Dublin.", "pred_entities": [[0, 10, "ORG"], [34, 40, "GPE"]]}
+{"text": "JP Morgan met investors in New York.", "pred_entities": [[0, 9, "ORG"], [27, 35, "GPE"]]}
+{"text": "Google announced a partnership with the University of Oxford.", "pred_entities": [[0, 6, "ORG"], [36, 60, "ORG"]]}
+{"text": "Tesla is building a new factory in Berlin.", "pred_entities": [[0, 5, "ORG"], [35, 41, "GPE"]]}
+{"text": "The headquarters of UNESCO are located in Paris.", "pred_entities": [[20, 26, "ORG"], [42, 47, "GPE"]]}
+{"text": "Amazon expanded its logistics network across Brazil.", "pred_entities": [[0, 6, "ORG"], [45, 51, "GPE"]]}
+{"text": "The European Central Bank held a meeting in Frankfurt.", "pred_entities": [[0, 25, "ORG"], [44, 53, "GPE"]]}
+{"text": "IBM opened a research center near Lake Tahoe.", "pred_entities": [[0, 3, "ORG"], [34, 44, "LOC"]]}
+{"text": "Meta Platforms is investing in AI hubs in Singapore.", "pred_entities": [[0, 14, "ORG"], [31, 33, "ORG"], [42, 51, "GPE"]]}
+{"text": "The United Nations hosted a summit in Geneva.", "pred_entities": [[0, 18, "ORG"], [38, 44, "GPE"]]}
