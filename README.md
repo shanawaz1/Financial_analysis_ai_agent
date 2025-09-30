@@ -78,7 +78,7 @@ pip install -r requirements.txt
 
 ### Run the Pipeline  
 ```bash
-python FIANALYST.py
+python FIN_AI_AGENT.py
 ```
 
 ### Access the Interface  
