@@ -1,0 +1,328 @@
+import os
+import gradio as gr
+import transformers
+from transformers import pipeline, AutoTokenizer, AutoModelForTokenClassification
+import spacy
+# Install SHAP if not already installed
+os.system("pip install shap")
+
+import shap
+import numpy as np
+
+# Install required packages
+os.system("pip install gradio==3.0.18")
+os.system("pip install librosa")
+os.system("pip install soundfile")
+
+# Load spaCy model
+transformers.logging.set_verbosity_debug()
+nlp = spacy.load("en_core_web_lg")  # Use large model for better accuracy
+nlp.add_pipe('sentencizer')
+text_masker = shap.maskers.Text(" ")
+
+def split_in_sentences(text):
+    doc = nlp(text)
+    return [str(sent).strip() for sent in doc.sents]
+
+def make_spans(text, results):
+    results_list = [results[i]['label'] for i in range(len(results))]
+    facts_spans = list(zip(split_in_sentences(text), results_list))
+    return facts_spans
+
+# Speech Recognition
+# asr = pipeline("automatic-speech-recognition", "facebook/wav2vec2-base-960h")
+# Use a pipeline as a high-level helper
+
+from transformers import pipeline
+
+# Initialize pipeline with chunking parameters
+asr = pipeline(
+    "automatic-speech-recognition",
+    model="openai/whisper-large-v3",
+    chunk_length_s=30,  # Split audio into 30s chunks
+    stride_length_s=(5, 5),  # 5s overlap at chunk boundaries
+    device=-1  # Use GPU if available
+)
+
+def speech_to_text(audio_path):
+    if audio_path is None:
+        return "Please upload an audio file first."
+    try:
+        # Process with timestamps and chunking
+        result = asr(audio_path, return_timestamps=True)
+        
+        # Combine text from all chunks
+        full_text = " ".join([chunk['text'] for chunk in result['chunks']])
+        
+        return full_text
+    except Exception as e:
+        return f"Error processing audio: {str(e)}"
+
+# Summarization
+summarizer = pipeline("summarization", model="knkarthick/MEETING_SUMMARY")
+
+def summarize_text(text):
+    resp = summarizer(text)
+    stext = resp[0]['summary_text']
+    return stext
+
+# Fiscal Tone Analysis
+fin_model = pipeline("sentiment-analysis", 
+                    model='yiyanghkust/finbert-tone', 
+                    tokenizer='yiyanghkust/finbert-tone')
+
+def text_to_sentiment(text):
+    sentiment = fin_model(text)[0]["label"]
+    return sentiment
+
+# Company Extraction
+def fin_ner(text):
+    doc = nlp(text)
+    entities = []
+    
+    for ent in doc.ents:
+        if ent.label_ == "ORG" and len(ent.text) > 2:
+            entities.append((ent.start_char, ent.end_char, "COMPANY"))
+        elif ent.label_ in ("GPE", "LOC"):
+            entities.append((ent.start_char, ent.end_char, "LOCATION"))
+    
+    # Convert to Gradio's HighlightedText format
+    output = []
+    last_end = 0
+    for start, end, label in sorted(entities, key=lambda x: x[0]):
+        # Add text before entity
+        if start > last_end:
+            output.append((text[last_end:start], None))
+        # Add entity
+        output.append((text[start:end], label))
+        last_end = end
+    # Add remaining text
+    if last_end < len(text):
+        output.append((text[last_end:], None))
+    
+    return output
+# Fiscal Sentiment by Sentence
+def fin_ext(text):
+    results = fin_model(split_in_sentences(text))
+    return make_spans(text, results)
+
+# Forward Looking Statement
+def fls(text):
+    fls_model = pipeline("text-classification", 
+                        model="yiyanghkust/finbert-fls", 
+                        tokenizer="yiyanghkust/finbert-fls")
+    results = fls_model(split_in_sentences(text))
+    return make_spans(text, results)
+
+# Labels for FinBERT
+finbert_labels = ["positive", "negative", "neutral"]
+
+
+# SHAP Explainer for FinBERT
+def finbert_predict(texts):
+    # SHAP may pass numpy arrays → convert them back to strings
+    clean_texts = []
+    for t in texts:
+        if isinstance(t, (list, np.ndarray)):
+            clean_texts.append(" ".join(map(str, t)))
+        else:
+            clean_texts.append(str(t))
+
+    outputs = fin_model(clean_texts)  # HuggingFace pipeline
+    prob_vectors = []
+    for out in outputs:
+        probs = [0.0, 0.0, 0.0]  # [positive, negative, neutral]
+        if out['label'].lower() == "positive":
+            probs[0] = out['score']
+        elif out['label'].lower() == "negative":
+            probs[1] = out['score']
+        elif out['label'].lower() == "neutral":
+            probs[2] = out['score']
+        total = sum(probs)
+        if total > 0:
+            probs = [p/total for p in probs]
+        prob_vectors.append(probs)
+    return np.array(prob_vectors)
+
+finbert_explainer = shap.Explainer(finbert_predict, text_masker)
+
+def explain_finbert(text):
+    shap_values = finbert_explainer([text])
+    # Generate HTML instead of trying to use .data
+    html = shap.plots.text(shap_values[0], display=False)
+    return html
+
+def global_shap_summary(text_list):
+    import matplotlib.pyplot as plt
+    import io
+    import base64
+
+    clean_texts = [str(t) for t in text_list if isinstance(t, str) and len(t.strip()) > 0]
+    if not clean_texts:
+        return "No valid input texts provided."
+
+    shap_values = finbert_explainer(clean_texts)
+
+    # Aggregate SHAP values across all texts
+    token_scores = {}
+    for sv in shap_values:
+        tokens = sv.data
+        values = sv.values
+        for token, val in zip(tokens, values):
+            # Convert val to scalar if it's an array
+            score = float(np.sum(np.abs(val))) if isinstance(val, np.ndarray) else abs(val)
+            token_scores[token] = token_scores.get(token, 0.0) + score
+
+    # Sort and select top tokens
+    sorted_tokens = sorted(token_scores.items(), key=lambda x: x[1], reverse=True)[:15]
+    tokens, scores = zip(*sorted_tokens)
+
+    # Plot using matplotlib
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.barh(tokens[::-1], scores[::-1], color="#009a4d")
+    ax.set_title("Top 15 Influential Tokens (Global SHAP Summary)")
+    ax.set_xlabel("Aggregate SHAP Value (Absolute)")
+    plt.tight_layout()
+
+    # Convert to base64 image
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+    img_str = base64.b64encode(buf.read()).decode("utf-8")
+    buf.close()
+    plt.close(fig)
+
+    return f'<img src="data:image/png;base64,{img_str}" width="700"/>'
+
+custom_css = """
+
+<style>
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #808000; /* Ice blue */
+    color: #000000; /* Darker text for contrast */
+}
+
+.gradio-container {
+    background-color: rgba(255, 255, 255, 0.8);  /* Light overlay for readability */
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 900px;
+    margin: auto;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+
+#logo {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 120px;
+    height: auto;
+    z-index: 1000;
+}
+
+button {
+    background-color: #009a4d;
+    border: none;
+    color: black;
+    padding: 12px 20px;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #8fbc8f;
+}
+
+/* Style selected/active tab */
+.tab-nav button[aria-selected="true"] {
+    background-color: #8fbc8f !important;
+    color: black !important;
+    font-weight: bold;
+}
+#logo {
+    position: absolute;
+    top: 5px;
+    right: 20px;
+    width: 80px;       /* Adjust this value to make it smaller */
+    height: auto;
+    z-index: 1000;
+}
+
+h1, h2, h3, h4 {
+    color: #000000;
+}
+
+input, textarea {
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    color: #000000;
+    background-color: #000000;
+}
+</style>
+"""
+
+# Create Gradio Interface
+demo = gr.Blocks()
+
+with demo:
+    gr.HTML(custom_css)  # Apply custom CSS
+    gr.Image("https://lh3.googleusercontent.com/pw/AP1GczMzUegdq6DGcyV69iCQ9SqCFfTiS6t8MwMxQNdJP2pwtXEX4KLpMJhIGjVgdoHs9vezs8eA-MWs7GBZsRqzrIVdH0fIrcMHiWiKl3L3O0yt7mShvQ=w2400", elem_id="logo")
+    gr.Markdown("## Financial Analyst AI")
+    gr.Markdown("This project applies AI trained to analyze earning calls and financial documents.")
+    
+    with gr.Tabs():
+        with gr.TabItem("Speech Recognition"):
+            audio_file = gr.Audio(source="upload", type="filepath", label="Upload Audio (WAV, MP3)")
+            text = gr.Textbox(label="Transcribed Text", lines=5, placeholder="Speech transcript output goes here...")
+            b1 = gr.Button("Recognize Speech")
+            b1.click(speech_to_text, inputs=audio_file, outputs=text)
+        
+        with gr.TabItem("Summarization & Tone"):
+            text_input = gr.Textbox(label="Input Text", lines=8, placeholder="Paste or type your text here...")
+            summary_output = gr.Textbox(label="Summary", lines=4)
+            b2 = gr.Button("Summarize")
+            b3 = gr.Button("Classify Financial Tone")
+            tone_label = gr.Label()
+            
+            b2.click(summarize_text, inputs=text_input, outputs=summary_output)
+            b3.click(text_to_sentiment, inputs=summary_output, outputs=tone_label)
+        
+        with gr.TabItem("In-depth Analysis"):
+            fin_spans = gr.HighlightedText(label="Financial Tone Analysis")
+            fls_spans = gr.HighlightedText(label="Forward Looking Statements")
+            entities_spans = gr.HighlightedText(label="Named Entities", 
+                                                color_map={"COMPANY": "#7CFC00", "LOCATION": "#00BFFF"})
+            
+            analyze_button = gr.Button("Analyze")
+            analyze_button.click(fin_ext, inputs=text_input, outputs=fin_spans)
+            analyze_button.click(fls, inputs=text_input, outputs=fls_spans)
+            analyze_button.click(fin_ner, inputs=text_input, outputs=entities_spans)
+        
+        with gr.TabItem("Global SHAP Summary"):
+            multi_text_input = gr.Textbox(
+                label="Paste multiple financial texts (separate by newline)",
+                lines=10,
+                placeholder="Text 1\nText 2\nText 3..."
+            )
+            global_shap_html = gr.HTML(label="Global SHAP Feature Importance")
+            global_button = gr.Button("Generate Global Summary")
+            global_button.click(
+                lambda txt: global_shap_summary(txt.split("\n")),
+                inputs=multi_text_input,
+                outputs=global_shap_html
+            )
+
+        # Launch the interface
+if __name__ == "__main__":
+    demo.launch(server_port=7861, share=True)  # share=True creates a public link

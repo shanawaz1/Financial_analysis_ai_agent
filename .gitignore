@@ -1,0 +1,14 @@
+myenv/
+__pycache__/
+*.pyc
+flagged/
+.vscode/
+.env
+spaCy/
+*.whl
+*.mp4
+*.wav
+*.mp3
+*.flac
+extras/*.whl
+shapupdate.txt

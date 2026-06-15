@@ -3,7 +3,7 @@ os.system("pip install gradio==3.0.18")
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification, AutoModelForTokenClassification
 import gradio as gr
 import spacy
-nlp = spacy.load('en_core_web_sm')
+nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe('sentencizer')
 
 def split_in_sentences(text):
@@ -18,7 +18,7 @@ def make_spans(text,results):
     facts_spans = list(zip(split_in_sentences(text),results_list))
     return facts_spans
     
-auth_token = os.environ.get("HF_Token")
+auth_token = os.environ.get("HF_AUTH_TOKEN", "")
 
 ##Speech Recognition
 asr = pipeline("automatic-speech-recognition", "facebook/wav2vec2-base-960h")
@@ -44,9 +44,18 @@ def text_to_sentiment(text):
 
 ##Company Extraction    
 def fin_ner(text):
-    api = gr.Interface.load("dslim/bert-base-NER", src='models', use_auth_token=auth_token)
-    replaced_spans = api(text)
-    return replaced_spans    
+    tokenizer = AutoTokenizer.from_pretrained("dslim/bert-base-NER")
+    model = AutoModelForTokenClassification.from_pretrained("dslim/bert-base-NER")
+    ner_pipeline = pipeline("ner", model=model, tokenizer=tokenizer, aggregation_strategy="simple")
+    entities = ner_pipeline(text)
+    # Extract only the names of the companies
+    company_names = []
+    for entity in entities:
+        if entity['entity_group'] == 'ORG':
+            company_names.append(entity['word'])
+
+    return company_names
+
 
 ##Fiscal Sentiment by Sentence
 def fin_ext(text):
@@ -56,7 +65,7 @@ def fin_ext(text):
 ##Forward Looking Statement
 def fls(text):
 #    fls_model = pipeline("text-classification", model="yiyanghkust/finbert-fls", tokenizer="yiyanghkust/finbert-fls")
-    fls_model = pipeline("text-classification", model="demo-org/finbert_fls", tokenizer="demo-org/finbert_fls", use_auth_token=auth_token)
+    fls_model = pipeline("text-classification", model="yiyanghkust/finbert-fls", tokenizer="yiyanghkust/finbert-fls")
     results = fls_model(split_in_sentences(text))
     return make_spans(text,results) 
 
