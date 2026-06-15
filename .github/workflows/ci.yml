@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Syntax check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m compileall -q .
+
+  security:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install detect-secrets
+        run: pip install detect-secrets
+      - name: Check for secrets
+        run: detect-secrets scan --all-files --baseline .secrets.baseline
+        continue-on-error: true
+
+  data-validation:
+    name: NER data validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python evaluation/validate_ner.py evaluation/data/ner.jsonl
+
+  import-test:
+    name: Module imports
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Cache spaCy model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/spacy
+          key: spacy-en-core-web-sm-${{ runner.os }}
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          python -m spacy download en_core_web_sm
+      - name: Verify imports
+        run: python -c "
+          from core.config import FINBERT_LABELS, FLS_LABELS, FLS_KEYWORDS, NER_LABEL_COLORS;
+          from core.analysis import split_in_sentences, make_spans, fin_ner, keyword_boost;
+          from core.shap_utils import _build_prob_table, _aggregate_shap_tokens;
+          print('All modules imported successfully')
+        "
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Cache spaCy model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/spacy
+          key: spacy-en-core-web-sm-${{ runner.os }}
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt pytest
+          python -m spacy download en_core_web_sm
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
